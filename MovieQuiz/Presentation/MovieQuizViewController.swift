@@ -42,6 +42,8 @@ final class MovieQuizViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        show(quiz: convert(model: questions[0]))
+     
     }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -67,7 +69,7 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        imageView.layer.cornerRadius = 6
+        imageView.layer.cornerRadius = 20
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
@@ -90,7 +92,7 @@ final class MovieQuizViewController: UIViewController {
             let ViewModel = convert(model: nextQuestion)
             
             show(quiz: ViewModel)
-            
+            imageView.layer.borderWidth = 0
         }
     }
     
@@ -108,6 +110,7 @@ final class MovieQuizViewController: UIViewController {
             let ViewModel = self.convert(model: firstQuestion)
             
             self.show(quiz: ViewModel)
+            self.imageView.layer.borderWidth = 0
         }
         
         alert.addAction(action)
