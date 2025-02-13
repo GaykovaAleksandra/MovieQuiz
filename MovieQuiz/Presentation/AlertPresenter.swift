@@ -6,13 +6,11 @@ final class AlertPresenter {
         let alertController = UIAlertController(title: model.title,
                                                 message: model.message,
                                                 preferredStyle: .alert)
-        
         let alertAction = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }
         
         alertController.addAction(alertAction)
-        
         viewController.present(alertController, animated: true, completion: nil)
     }
 }

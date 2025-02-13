@@ -4,10 +4,11 @@ final class StatisticService {
     private let storage = UserDefaults.standard
 }
 
+// MARK: - StatisticServiceProtocol
+
 extension StatisticService: StatisticServiceProtocol {
     var gamesCount: Int {
         get {
-//            storage.removeObject(forKey: Keys.gamesCount.rawValue)
             return storage.integer(forKey: Keys.gamesCount.rawValue)
         }
         set {
@@ -15,17 +16,16 @@ extension StatisticService: StatisticServiceProtocol {
         }
     }
     
+    // MARK: - Public Poperties
     var bestGame: GameResult {
         get {
             let correct = storage.integer(forKey: Keys.bestGameCorrect.rawValue)
             let total = storage.integer(forKey: Keys.bestGameTotal.rawValue)
-            var date = storage.object(forKey: Keys.bestGameDate.rawValue) as? Date ?? Date()
+            let date = storage.object(forKey: Keys.bestGameDate.rawValue) as? Date ?? Date()
             
-//            storage.removeObject(forKey: Keys.bestGameCorrect.rawValue)
-//            storage.removeObject(forKey: Keys.bestGameTotal.rawValue)
-//            storage.removeObject(forKey: Keys.bestGameDate.rawValue)
+            let localDate = Calendar.current.date(byAdding: .hour, value: 3, to: date) ?? date
             
-            return GameResult(correct: correct, total: total, date: date )
+            return GameResult(correct: correct, total: total, date: localDate )
         }
         set {
             storage.set(newValue.correct, forKey: Keys.bestGameCorrect.rawValue)
@@ -36,33 +36,34 @@ extension StatisticService: StatisticServiceProtocol {
     
     var totalAccuracy: Double {
         let totalGames = storage.integer(forKey: Keys.gamesCount.rawValue)
-        let correctAnswers = storage.integer(forKey: "totalCorrectAnswers")
-        
-//        storage.removeObject(forKey: Keys.gamesCount.rawValue)
-//        storage.removeObject(forKey: "totalCorrectAnswers")
+        let totalCorrectAnswers = storage.integer(forKey: "totalCorrectAnswers")
+        storage.set(totalCorrectAnswers, forKey: "totalCorrectAnswers")
         
         guard totalGames > 0 else {
             return 0.0
         }
-       
+        
         let totalQuestions = Double(totalGames) * 10.0
         
-        return (Double(correctAnswers) / totalQuestions) * 100.0
+        return (Double(totalCorrectAnswers) / totalQuestions) * 100.0
     }
     
-    func store(correct count: Int, total amount: Int) {
+    // MARK: - Public Methods
     
+    func store(correct count: Int, total amount: Int) {
         if count > self.bestGame.correct {
             let newBestGame = GameResult(correct: count, total: amount, date: Date())
             bestGame = newBestGame
         }
-      
-        let totalCorrectAnswers = storage.integer(forKey: "totalCorrectAnswers")
+        
+        let totalCorrectAnswers = storage.integer(forKey: "totalCorrectAnswers") + count
         storage.set(totalCorrectAnswers, forKey: "totalCorrectAnswers")
         
-        let totalGames = gamesCount
+        let totalGames = gamesCount + 1
         storage.set(totalGames, forKey: Keys.gamesCount.rawValue)
     }
+    
+    // MARK: - Private Enum
     
     private enum Keys:String {
         case gamesCount
