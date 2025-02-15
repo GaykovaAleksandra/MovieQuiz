@@ -81,12 +81,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNextQuestionOrResults() {
-        changeStateButtons(isEnabled: true)
+        changeButtonsState(isEnabled: true)
         if currentQuestionIndex == questionsAmount - 1 {
             statisticService.store(correct: correctAnswers, total: questionsAmount)
-            statisticService.gamesCount += 1
+            statisticService.gamesCount += 1         
             
-            let text = "Ваш результат: \(correctAnswers)/\(questionsAmount) \n Количество сыграных квизов: \(statisticService.gamesCount) \n Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date)) \n Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            let text = """
+            Ваш результат: \(correctAnswers)/\(questionsAmount)
+            Количество сыграных квизов: \(statisticService.gamesCount)
+            Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))
+            Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+            """
+            
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 text: text,
@@ -100,7 +106,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    private func changeStateButtons(isEnabled: Bool) {
+    private func changeButtonsState(isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
         noButton.isEnabled = isEnabled
     }
@@ -112,7 +118,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             message: result.text,
             buttonText: result.buttonText,
             completion: {[weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.currentQuestionIndex = 0
                 self.correctAnswers = 0
@@ -127,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - IB Actions
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        changeStateButtons(isEnabled: false)
+        changeButtonsState(isEnabled: false)
         guard let currentQuestion = currentQuestion else {
             return
         }
@@ -137,7 +143,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        changeStateButtons(isEnabled: false)
+        changeButtonsState(isEnabled: false)
         guard let currentQuestion = currentQuestion else {
             return
         }
