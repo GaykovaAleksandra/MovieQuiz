@@ -167,7 +167,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
+        DispatchQueue.main.async { [weak self] in
+            self?.activityIndicator.isHidden = true
+        }
     }
     
     private func showNetWorkError(message: String) {
