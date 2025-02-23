@@ -1,5 +1,6 @@
 import Foundation
 
+
 class QuestionFactory: QuestionFactoryProtocol {
     private let moviesLoader: MoviesLoading
     weak var delegate: QuestionFactoryDelegate?
@@ -17,13 +18,16 @@ class QuestionFactory: QuestionFactoryProtocol {
     
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success(let mostPopularMovies):
-                self.movies = mostPopularMovies.items
-                self.delegate?.didLoadDataFromServer()
-            case .failure(let error):
-                self.delegate?.didFailToLoadData(with: error)
+            DispatchQueue.main.async {
+                guard let self else { return }
+                
+                switch result {
+                case .success(let mostPopularMovies):
+                    self.movies = mostPopularMovies.items
+                    self.delegate?.didLoadDataFromServer()
+                case .failure(let error):
+                    self.delegate?.didFailToLoadData(with: error)
+                }
             }
         }
     }
@@ -45,17 +49,29 @@ class QuestionFactory: QuestionFactoryProtocol {
             
             let rating = Float(movie.rating) ?? 0
             
-            let text = "Рейтинг этого фильма больше чем 7?"
-            let correctAnswer = rating > 7
+            let randomAnswers: [(text: String, threshold: Float, isGreater: Bool)] = [
+                ("Рейтинг этого фильма больше чем 7?", 7, true),
+                ("Рейтинг этого фильма меньше чем 7?", 7, false),
+                ("Рейтинг этого фильма больше чем 8?", 8, true),
+                ("Рейтинг этого фильма меньше чем 8?", 8, false),
+                ("Рейтинг этого фильма больше чем 9?", 9, true),
+                ("Рейтинг этого фильма меньше чем 9?", 9, false)
+            ]
+            
+            let randomQuestion = randomAnswers.randomElement()!
+            let questionText = randomQuestion.text
+            let thresholdRating = randomQuestion.threshold
+            
+            let correctAnswer = randomQuestion.isGreater ? (rating > thresholdRating) : (rating < thresholdRating)
             
             let question = QuizQuestion(image: imageData,
-                                        text: text, correctAnswer:
-                                            correctAnswer)
+                                        text: questionText,
+                                        correctAnswer: correctAnswer)
             
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 self.delegate?.didReceiveNextQuestion(question: question)
             }
-        }   
+        }
     }
 }

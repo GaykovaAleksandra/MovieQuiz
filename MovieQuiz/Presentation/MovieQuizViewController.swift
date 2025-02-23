@@ -14,7 +14,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     weak var delegate: QuestionFactoryDelegate?
     
     // MARK: - Private Properties
-   
+    
     private var correctAnswers = 0
     private var currentQuestionIndex = 0
     private let questionsAmount = 10
@@ -22,6 +22,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var movies: [MostPopularMovie] = []
+    private lazy var alert: AlertPresenter = AlertPresenter(controller: self)
     
     // MARK: - Overrides Methods
     
@@ -31,9 +32,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticService()
-        
-        showLoadingIndicator()
-        questionFactory?.loadData()
+            
+            showLoadingIndicator()
+            questionFactory?.loadData()
     }
     
     // MARK: - Public Methods
@@ -50,29 +51,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func didLoadDataFromServer() {
-        DispatchQueue.main.async { [weak self] in
-            self?.activityIndicator.isHidden = true
-            self?.questionFactory?.requestNextQuestion()
-        }
+        hideLoadingIndicator()
+            questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: Error) {
         showNetWorkError(message: error.localizedDescription)
-    }
-    
-    func loadData() {
-        MoviesLoader().loadMovies { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                switch result {
-                case .success(let mostPopularMovies):
-                    self.movies = mostPopularMovies.items
-                    self.delegate?.didLoadDataFromServer()
-                case .failure(let error):
-                    self.delegate?.didFailToLoadData(with: error)
-                }
-            }
-        }
     }
     
     // MARK: - Private Methods
@@ -115,7 +99,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         changeButtonsState(isEnabled: true)
         if currentQuestionIndex == questionsAmount - 1 {
             statisticService.store(correct: correctAnswers, total: questionsAmount)
-            statisticService.gamesCount += 1         
+            statisticService.gamesCount += 1
             
             let text = """
             Ваш результат: \(correctAnswers)/\(questionsAmount)
@@ -133,7 +117,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             currentQuestionIndex += 1
             
-            questionFactory?.requestNextQuestion()
+            didLoadDataFromServer()
         }
     }
     
@@ -147,18 +131,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let alertModel = AlertModel(
             title: result.title,
             message: result.text,
-            buttonText: result.buttonText,
-            completion: {[weak self] in
+            buttonText: result.buttonText) {[weak self] in
                 guard let self else { return }
                 
                 self.currentQuestionIndex = 0
                 self.correctAnswers = 0
                 
-                questionFactory?.requestNextQuestion()
+                didLoadDataFromServer()
             }
-        )
         
-        AlertPresenter.showAlert(in: self, with: alertModel)
+        alert.showAlert(with: alertModel)
     }
     
     private func showLoadingIndicator() {
@@ -167,9 +149,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func hideLoadingIndicator() {
-        DispatchQueue.main.async { [weak self] in
-            self?.activityIndicator.isHidden = true
-        }
+        activityIndicator.isHidden = true
     }
     
     private func showNetWorkError(message: String) {
@@ -181,10 +161,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
-            self.questionFactory?.requestNextQuestion()
+            questionFactory?.loadData()
         }
-        AlertPresenter.showAlert(in: self, with: uiAlertController)
-}
+        
+        alert.showAlert(with: uiAlertController)
+    }
     
     // MARK: - IB Actions
     
