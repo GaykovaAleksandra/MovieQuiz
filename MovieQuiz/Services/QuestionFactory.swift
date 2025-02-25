@@ -1,16 +1,15 @@
 import Foundation
 
-
-class QuestionFactory: QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     private let moviesLoader: MoviesLoading
+    private var movies: [MostPopularMovie] = []
+    
     weak var delegate: QuestionFactoryDelegate?
     
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
     }
-    
-    private var movies: [MostPopularMovie] = []
     
     func setup(delegate: QuestionFactoryDelegate) {
         self.delegate = delegate
@@ -35,6 +34,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
+            
             let index = (0..<self.movies.count).randomElement() ?? 0
             
             guard let movie = self.movies[safe: index] else { return }
@@ -58,7 +58,10 @@ class QuestionFactory: QuestionFactoryProtocol {
                 ("Рейтинг этого фильма меньше чем 9?", 9, false)
             ]
             
-            let randomQuestion = randomAnswers.randomElement()!
+            let randomQuestion = randomAnswers.randomElement()
+            
+            guard let randomQuestion else { return }
+            
             let questionText = randomQuestion.text
             let thresholdRating = randomQuestion.threshold
             

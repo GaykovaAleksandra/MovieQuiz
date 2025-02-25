@@ -32,9 +32,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticService()
-            
-            showLoadingIndicator()
-            questionFactory?.loadData()
+        
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - Public Methods
@@ -52,7 +52,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     func didLoadDataFromServer() {
         hideLoadingIndicator()
-            questionFactory?.requestNextQuestion()
+        questionFactory?.requestNextQuestion()
     }
     
     func didFailToLoadData(with error: Error) {
@@ -171,7 +171,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         changeButtonsState(isEnabled: false)
-        guard let currentQuestion = currentQuestion else {
+        guard let currentQuestion else {
             return
         }
         
@@ -181,7 +181,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         changeButtonsState(isEnabled: false)
-        guard let currentQuestion = currentQuestion else {
+        guard let currentQuestion else {
             return
         }
         

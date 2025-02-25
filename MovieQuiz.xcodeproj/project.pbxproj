@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A80B28F82D6B7044009CC72F /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80B28F72D6B7036009CC72F /* InternetConnection.swift */; };
 		A866A56A2D3407E600309AAB /* YS Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A866A5672D3407E600309AAB /* YS Display-Bold.ttf */; };
 		A866A5882D34132400309AAB /* YS Display-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A866A5872D34132400309AAB /* YS Display-Medium.ttf */; };
 		A8C784CF2D57A0B300892905 /* StatisticServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C784CE2D57A08200892905 /* StatisticServiceProtocol.swift */; };
@@ -36,7 +35,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A80B28F72D6B7036009CC72F /* InternetConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
 		A866A5672D3407E600309AAB /* YS Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Bold.ttf"; sourceTree = "<group>"; };
 		A866A5872D34132400309AAB /* YS Display-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Medium.ttf"; sourceTree = "<group>"; };
 		A8C784CE2D57A08200892905 /* StatisticServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticServiceProtocol.swift; sourceTree = "<group>"; };
@@ -93,7 +91,6 @@
 		6113423A2B701CF8003FC2A4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				A80B28F72D6B7036009CC72F /* InternetConnection.swift */,
 				A8C784DA2D64B5BF00892905 /* MoviesLoader.swift */,
 				A8C784D42D64ADBC00892905 /* NetworkClient.swift */,
 				A8C784CE2D57A08200892905 /* StatisticServiceProtocol.swift */,
@@ -261,7 +258,6 @@
 				AD1ABAB62831907B00B3E448 /* MovieQuizViewController.swift in Sources */,
 				A8E86D372D4E4E7800423B47 /* QuizStepViewModel.swift in Sources */,
 				A8E86D3B2D4E4EA600423B47 /* QuizQuestion.swift in Sources */,
-				A80B28F82D6B7044009CC72F /* InternetConnection.swift in Sources */,
 				A8E86D412D4F5C0500423B47 /* AlertModel.swift in Sources */,
 				A8C784CF2D57A0B300892905 /* StatisticServiceProtocol.swift in Sources */,
 				A8E86D352D4D54E500423B47 /* QuestionFactory.swift in Sources */,
