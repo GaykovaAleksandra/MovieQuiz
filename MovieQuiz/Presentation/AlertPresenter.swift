@@ -1,6 +1,7 @@
 import UIKit
 
 final class AlertPresenter {
+    
     weak var controller: UIViewController?
     
     init(controller: UIViewController?) {
@@ -8,14 +9,19 @@ final class AlertPresenter {
     }
     
     func showAlert(with model: AlertModel) {
+        guard let controller else { return }
+        
         let alertController = UIAlertController(title: model.title,
                                                 message: model.message,
                                                 preferredStyle: .alert)
+        
+        alertController.view.accessibilityIdentifier = "Game results"
+       
         let alertAction = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }
         
         alertController.addAction(alertAction)
-        controller?.present(alertController, animated: true)
+        controller.present(alertController, animated: true)
     }
 }
