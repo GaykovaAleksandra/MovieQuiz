@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
     // MARK: - IB Outlets
     
@@ -14,11 +14,11 @@ final class MovieQuizViewController: UIViewController {
     weak var delegate: QuestionFactoryDelegate?
     
     // MARK: - Private Properties
-
+    
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var movies: [MostPopularMovie] = []
     private lazy var alert: AlertPresenter = AlertPresenter(controller: self)
-    private var presenter = MovieQuizPresenter!
+    private var presenter: MovieQuizPresenter!
     
     // MARK: - Lifecycle
     
@@ -27,17 +27,15 @@ final class MovieQuizViewController: UIViewController {
         presenter = MovieQuizPresenter(viewController: self)
         
         imageView.layer.cornerRadius = 20
-//        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticService()
         
         showLoadingIndicator()
         self.presenter.restartGame()
-//        questionFactory?.loadData()
     }
-      
+    
     // MARK: - Private Methods
     
-     func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
@@ -45,19 +43,11 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderWidth = 0
     }
     
-    func showAnswerResult(isCorrect: Bool) {
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
-        
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         imageView.layer.cornerRadius = 20
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self else { return }
-            
-            self.presenter.showNextQuestionOrResults()
-        }
     }
     
     func changeButtonsState(isEnabled: Bool) {
@@ -65,11 +55,12 @@ final class MovieQuizViewController: UIViewController {
         noButton.isEnabled = isEnabled
     }
     
-     func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
+        let message = presenter.makeResultsMessage()
         
         let alertModel = AlertModel(
             title: result.title,
-            message: result.text,
+            message: message,
             buttonText: result.buttonText) {[weak self] in
                 guard let self else { return }
                 
@@ -80,24 +71,22 @@ final class MovieQuizViewController: UIViewController {
         alert.showAlert(with: alertModel)
     }
     
-     func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
-     func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.isHidden = true
     }
     
-     func showNetWorkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         
         let uiAlertController = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
             guard let self else { return }
             
             self.presenter.restartGame()
-            
-//            questionFactory?.loadData()
         }
         
         alert.showAlert(with: uiAlertController)
