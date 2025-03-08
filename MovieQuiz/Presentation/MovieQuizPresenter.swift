@@ -1,22 +1,55 @@
 import UIKit
 
-final class MovieQuizPresenter {
-    var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
+    private var questionFactory: QuestionFactoryProtocol?
+    private weak var viewController: MovieQuizViewController?
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+    
+    var currentQuestion: QuizQuestion?
     private var currentQuestionIndex = 0
     let questionsAmount = 10
     
-     var correctAnswers = 0
-     var questionFactory: QuestionFactoryProtocol?
+    private var correctAnswers = 0
     var statisticService: StatisticServiceProtocol = StatisticService()
+    
+    // MARK: - QuestionFactoryDelegate
+    
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        let message = error.localizedDescription
+        viewController?.showNetWorkError(message: message)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
     
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }
     
-    func resetQuestionIndex() {
+    func restartGame() {
         currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
     }
     
     func switchToNextQuestion() {
@@ -28,6 +61,13 @@ final class MovieQuizPresenter {
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    }
+    
+    func didAnswer(isCorrectAnswer: Bool) {
+        if isCorrectAnswer {
+            correctAnswers += 1
+        }
+//        statisticService.store(correct: correctAnswers, total: questionsAmount)
     }
     
     private func didAnswer(isYes: Bool) {
@@ -44,22 +84,11 @@ final class MovieQuizPresenter {
         didAnswer(isYes: true)
     }
     
-      func noButtonClicked() {
-          didAnswer(isYes: false)
+    func noButtonClicked() {
+        didAnswer(isYes: false)
     }
     
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question else { return }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quiz: viewModel)
-        }
-    }
-    
-     func showNextQuestionOrResults() {
+    func showNextQuestionOrResults() {
         viewController?.changeButtonsState(isEnabled: true)
         if self.isLastQuestion() {
             statisticService.store(correct: correctAnswers, total: self.questionsAmount)
@@ -81,7 +110,7 @@ final class MovieQuizPresenter {
         } else {
             self.switchToNextQuestion()
             
-            viewController?.didLoadDataFromServer()
+    didLoadDataFromServer()
         }
     }
 }
